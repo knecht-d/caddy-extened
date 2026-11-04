@@ -1,0 +1,14 @@
+{
+    local_certs
+    tls_automate_names mqtt.localhost
+
+    layer4 {
+        tcp/:8883 {
+            @mqtt tls sni mqtt.localhost
+            route @mqtt {
+                tls
+                proxy tcp/mqtt-broker:1883
+            }
+        }
+    }
+}

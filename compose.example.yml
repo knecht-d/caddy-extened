@@ -1,0 +1,28 @@
+services:
+  caddy:
+    image: knechtd/caddy-extended:stable
+    restart: unless-stopped
+    environment:
+      CADDY_INGRESS_NETWORKS: caddy
+      CADDY_DOCKER_CADDYFILE_PATH: /etc/caddy/Caddyfile
+    ports:
+      - "80:80"
+      - "443:443/tcp"
+      - "443:443/udp"
+      # Layer 4: publish additional TCP/UDP ports when configured.
+      # - "9443:9443/tcp"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    networks:
+      - caddy
+
+networks:
+  caddy:
+    external: true
+
+volumes:
+  caddy_data:
+  caddy_config:

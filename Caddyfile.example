@@ -1,0 +1,17 @@
+{
+    # Replace all sample values with your public hostname and target.
+    # The example demonstrates TLS termination for an arbitrary TCP service.
+    tls_automate_names tcp.example.com
+
+    layer4 {
+        tcp/:9443 {
+            @tcp_service tls sni tcp.example.com
+            route @tcp_service {
+                tls
+                proxy tcp/tcp-backend:9000
+            }
+        }
+    }
+}
+
+# HTTP sites can still be configured using Docker labels.

@@ -1,0 +1,29 @@
+name: Test
+on:
+  pull_request:
+    branches: [main]
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify repository configuration
+        run: |
+          python3 -m json.tool renovate.json >/dev/null
+          docker compose -f compose.example.yml config -q
+          bash -n tests/smoke.sh
+      - name: Build image
+        run: docker build -t caddy-extended:test .
+      - name: Verify compiled modules
+        run: |
+          docker run --rm caddy-extended:test caddy list-modules | tee /tmp/caddy-modules
+          grep -Fx 'layer4' /tmp/caddy-modules
+          grep -q 'docker_proxy' /tmp/caddy-modules
+      - name: End-to-end HTTP and MQTT over TLS tests
+        run: IMAGE=caddy-extended:test bash tests/smoke.sh
